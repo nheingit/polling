@@ -75,8 +75,6 @@ export function useWalletConnectors(): WalletConnector[] {
   function pollWallet(wallet: WalletInstance, numberOfPolls: number): Boolean {
     console.log('WALLET',wallet.id)
     for(let i = 0; i < numberOfPolls; i++) {
-      console.log('wallet.installed ?? true', wallet.installed ?? true)
-      console.log('wallet.installed == true', wallet.installed == true)
       if((wallet.installed ?? true) && wallet.connector.ready) return true
     }
       return false
@@ -96,7 +94,7 @@ export function useWalletConnectors(): WalletConnector[] {
         wallet.connector.on('message', ({ type }) =>
           type === 'connecting' ? fn() : undefined
         ),
-      ready: pollWallet(wallet, 50),
+      ready: pollWallet(wallet, 100),
       recent,
       showWalletConnectModal: wallet.walletConnectModalConnector
         ? async () => {
