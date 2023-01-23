@@ -10,7 +10,7 @@ import { WalletInstance } from './Wallet';
 import { addRecentWalletId, getRecentWalletIds } from './recentWalletIds';
 
 export interface WalletConnector extends WalletInstance {
-  ready?: boolean;
+  ready?: Boolean;
   connect?: ReturnType<typeof useConnect>['connectAsync'];
   onConnecting?: (fn: () => void) => void;
   showWalletConnectModal?: () => void;
@@ -18,6 +18,7 @@ export interface WalletConnector extends WalletInstance {
 }
 
 export function useWalletConnectors(): WalletConnector[] {
+  console.time('testing')
   const rainbowKitChains = useRainbowKitChains();
   const intialChainId = useInitialChainId();
   const { connectAsync, connectors: defaultConnectors_untyped } = useConnect();
@@ -71,6 +72,15 @@ export function useWalletConnectors(): WalletConnector[] {
 
   const walletConnectors: WalletConnector[] = [];
 
+  function pollWallet(wallet: WalletInstance, numberOfPolls: number): Boolean {
+    console.log('WALLET',wallet.id)
+    for(let i = 0; i < numberOfPolls; i++) {
+      console.log('wallet.installed ?? true', wallet.installed ?? true)
+      console.log('wallet.installed == true', wallet.installed == true)
+      if((wallet.installed ?? true) && wallet.connector.ready) return true
+    }
+      return false
+  }
   groupedWallets.forEach((wallet: WalletInstance) => {
     if (!wallet) {
       return;
@@ -86,7 +96,7 @@ export function useWalletConnectors(): WalletConnector[] {
         wallet.connector.on('message', ({ type }) =>
           type === 'connecting' ? fn() : undefined
         ),
-      ready: (wallet.installed ?? true) && wallet.connector.ready,
+      ready: pollWallet(wallet, 10),
       recent,
       showWalletConnectModal: wallet.walletConnectModalConnector
         ? async () => {
@@ -107,5 +117,7 @@ export function useWalletConnectors(): WalletConnector[] {
         : undefined,
     });
   });
+  console.timeEnd('testing')
+  walletConnectors.forEach((wallet, i) => console.log(i, ":", wallet.id, 'ready:',wallet.ready, 'installed:',wallet.installed, 'connector', wallet.connector.ready))
   return walletConnectors;
 }
