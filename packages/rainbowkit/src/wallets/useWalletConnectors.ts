@@ -96,7 +96,7 @@ export function useWalletConnectors(): WalletConnector[] {
         wallet.connector.on('message', ({ type }) =>
           type === 'connecting' ? fn() : undefined
         ),
-      ready: pollWallet(wallet, 20),
+      ready: pollWallet(wallet, 50),
       recent,
       showWalletConnectModal: wallet.walletConnectModalConnector
         ? async () => {
